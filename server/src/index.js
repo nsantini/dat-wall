@@ -28,9 +28,13 @@
   });
 
   app.post('/wall', (req, res) => {
-    dat.join(req.body.name, req.body.key)
-    .then(key => res.status(200).json({key}))
-    .catch(err => res.status(500).json(err));
+    try {
+      dat.join(req.body.name, req.body.key)
+      .then(key => res.status(200).json({key}))
+      .catch(err => res.status(500).json(err));
+    } catch(err) {
+      res.status(500).json(err);
+    }
   });
 
   const server = app.listen(cli.port, err => {
