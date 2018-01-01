@@ -10,7 +10,7 @@
   const logger = log4js.getLogger('dat');
   logger.level = 'debug';
 
-  module.exports = {
+  const api = {
     dat: null,
     join: (name, key) => {
       return new Promise((resolve, reject) => {
@@ -20,7 +20,7 @@
             logger.error('Error starting Dat. ', err);
             return reject(err);
           }
-          this.dat = dat;
+          api.dat = dat;
           dat.importFiles();
           dat.joinNetwork();
           logger.info('My Dat link is: dat://', dat.key.toString('hex'));
@@ -34,5 +34,7 @@
         }
       });
     }
-  }
+  };
+
+  module.exports = api;
 })();
