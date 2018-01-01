@@ -4,13 +4,21 @@
 (function () {
   'use strict';
 
+  const cli = require('commander');
   const express = require('express');
   const bodyParser = require('body-parser');
   const log4js = require('log4js');
   const dat = require('./dat');
 
+  // configure command line parser
+  cli
+    .version('0.0.1')
+    .option('-p, --port [port]', 'Run as a web server on specified port', parseInt)
+    .option('-l, --level [level]', 'Specify a log level')
+    .parse(process.argv);
+
   const logger = log4js.getLogger('server');
-  logger.level = process.env.LOG_LEVEL;
+  logger.level = cli.level || 'debug';
 
   const app = express();
   app.use(bodyParser.json());
@@ -20,19 +28,12 @@
   });
 
   app.post('/wall', (req, res) => {
-    if (req.body.key) {
-      dat.join(req.body.name, req.body.key)
-      .then(() => res.sendStatus(200))
-      .catch(err => res.status(500).json(err));
-    } else {
-      dat.create(req.body.name)
-      .then(key => res.status(200).json({key}))
-      .catch(err => res.status(500).json(err));
-    }
+    dat.join(req.body.name, req.body.key)
+    .then(key => res.status(200).json({key}))
+    .catch(err => res.status(500).json(err));
   });
 
-  const port = Number(process.env.PORT);
-  const server = app.listen(port, err => {
-    logger.debug(`Dat Wall server listening on port ${port}, running Node ${process.version}`);
+  const server = app.listen(cli.port, err => {
+    logger.info(`Dat Wall server listening on port ${cli.port}, running Node ${process.version}`);
   });
 })();

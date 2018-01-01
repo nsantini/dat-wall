@@ -6,48 +6,32 @@
 
   const path = require('path');
   const Dat = require('dat-node');
+  const log4js = require('log4js');
+  const logger = log4js.getLogger('dat');
+  logger.level = 'debug';
 
   module.exports = {
-    create: name => {
-      return new Promise((resolve, reject) => {
-        const src = path.join(__dirname, '..', 'dat-archive', name);
-        // 1. My files are in 'src'
-        Dat(src, (err, dat) => {
-          if (err) {
-            console.log('Error starting Dat. ', err);
-            return reject(err);
-          }
-  
-          // 2. Import the files
-          dat.importFiles();
-  
-          // 3. Share the files on the network!
-          dat.joinNetwork();
-  
-          // (And share the link)
-          console.log('My Dat link is: dat://', dat.key.toString('hex'));
-          resolve(dat.key.toString('hex'));
-        });
-      });
-    },
-
+    dat: null,
     join: (name, key) => {
       return new Promise((resolve, reject) => {
         const src = path.join(__dirname, '..', 'dat-archive', name);
-        // 1. Tell Dat where to download the files
-        Dat(src, {
-          // 2. Tell Dat what link I want
-          key: key // (a 64 character hash from above)
-        }, function (err, dat) {
+        const joined = (err, dat) => {
           if (err) {
-            console.log('Error starting Dat. ', err);
+            logger.error('Error starting Dat. ', err);
             return reject(err);
           }
-
-          // 3. Join the network & download (files are automatically downloaded)
+          this.dat = dat;
+          dat.importFiles();
           dat.joinNetwork();
-          resolve();
-        });
+          logger.info('My Dat link is: dat://', dat.key.toString('hex'));
+          resolve(dat.key.toString('hex'));
+        };
+
+        if (key) {
+          Dat(src, { key }, joined);
+        } else {
+          Dat(src, joined);
+        }
       });
     }
   }

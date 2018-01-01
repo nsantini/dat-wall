@@ -58,3 +58,5 @@ typings/
 .env
 
 dat-archive
+package.json
+package-lock.json

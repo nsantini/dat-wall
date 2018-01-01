@@ -10,10 +10,12 @@
       "name": "Server",
       "program": "${workspaceFolder}/server/src/index.js",
       "cwd": "${workspaceRoot}/server",
-      "env": {
-        "PORT": "8000",
-        "LOG_LEVEL": "debug"
-      }
+      "args": [
+        "-p",
+        "8000",
+        "-l",
+        "debug"
+      ]
     }
   ]
 }
